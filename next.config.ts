@@ -209,6 +209,14 @@ export default withNextIntl({
     return [
       ...rewrites,
       {
+        source: '/comment',
+        destination: 'https://waline-two-sandy.vercel.app/comment',
+      },
+      {
+        source: '/counter',
+        destination: 'https://waline-two-sandy.vercel.app/counter',
+      },
+      {
         source: '/telemetry.js',
         destination: '/api/scripts/telemetry',
       },
