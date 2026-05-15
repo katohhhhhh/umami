@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { cors, OPTIONS as corsOptions } from '@/lib/waline-cors';
+
+export { corsOptions as OPTIONS };
 
 function toComment(row: any) {
   return {
@@ -36,11 +39,11 @@ export async function GET(
       'SELECT * FROM wl_comment WHERE object_id = $1', id
     );
     if (r.length === 0) {
-      return NextResponse.json({ errno: 1, errmsg: 'Comment not found' }, { status: 404 });
+      return cors(_req, NextResponse.json({ errno: 1, errmsg: 'Comment not found' }, { status: 404 }));
     }
-    return NextResponse.json({ errno: 0, errmsg: '', data: toComment(r[0]) });
+    return cors(_req, NextResponse.json({ errno: 0, errmsg: '', data: toComment(r[0]) }));
   } catch (e: any) {
-    return NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 });
+    return cors(_req, NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 }));
   }
 }
 
@@ -67,24 +70,24 @@ export async function PUT(
       'SELECT * FROM wl_comment WHERE object_id = $1', id
     );
     if (r.length === 0) {
-      return NextResponse.json({ errno: 1, errmsg: 'Comment not found' }, { status: 404 });
+      return cors(req, NextResponse.json({ errno: 1, errmsg: 'Comment not found' }, { status: 404 }));
     }
-    return NextResponse.json({ errno: 0, errmsg: '', data: toComment(r[0]) });
+    return cors(req, NextResponse.json({ errno: 0, errmsg: '', data: toComment(r[0]) }));
   } catch (e: any) {
-    return NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 });
+    return cors(req, NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 }));
   }
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
     await prisma.client.$executeRawUnsafe('DELETE FROM wl_comment WHERE pid = $1', id);
     await prisma.client.$executeRawUnsafe('DELETE FROM wl_comment WHERE object_id = $1', id);
-    return NextResponse.json({ errno: 0, errmsg: '' });
+    return cors(req, NextResponse.json({ errno: 0, errmsg: '' }));
   } catch (e: any) {
-    return NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 });
+    return cors(req, NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 }));
   }
 }

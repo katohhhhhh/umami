@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '@/lib/prisma';
+import { cors, OPTIONS as corsOptions } from '@/lib/waline-cors';
+
+export { corsOptions as OPTIONS };
 
 function genId() {
   return crypto.randomUUID();
@@ -87,7 +90,7 @@ export async function GET(req: NextRequest) {
         'SELECT COUNT(*)::int AS count FROM wl_comment WHERE url = $1 AND status = $2',
         url, 'approved'
       );
-      return NextResponse.json({ errno: 0, errmsg: '', data: r[0].count });
+      return cors(req, NextResponse.json({ errno: 0, errmsg: '', data: r[0].count }));
     }
 
     if (type === 'recent') {
@@ -96,7 +99,7 @@ export async function GET(req: NextRequest) {
         'SELECT * FROM wl_comment WHERE status = $1 ORDER BY created_at DESC LIMIT $2',
         'approved', count
       );
-      return NextResponse.json({ errno: 0, errmsg: '', data: r.map(toComment) });
+      return cors(req, NextResponse.json({ errno: 0, errmsg: '', data: r.map(toComment) }));
     }
 
     const countResult: any = await prisma.client.$queryRawUnsafe(
@@ -143,13 +146,13 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return cors(req, NextResponse.json({
       errno: 0,
       errmsg: '',
       data: { page, totalPages, pageSize, count: total, data: rootComments }
-    });
+    }));
   } catch (e: any) {
-    return NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 });
+    return cors(req, NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 }));
   }
 }
 
@@ -172,7 +175,7 @@ export async function POST(req: NextRequest) {
       }
     }
     if (!body.comment || !body.comment.trim()) {
-      return NextResponse.json({ errno: 1, errmsg: 'Comment content is required' }, { status: 400 });
+      return cors(req, NextResponse.json({ errno: 1, errmsg: 'Comment content is required' }, { status: 400 }));
     }
 
     const url = body.url || '/';
@@ -190,8 +193,8 @@ export async function POST(req: NextRequest) {
     const r: any = await prisma.client.$queryRawUnsafe(
       'SELECT * FROM wl_comment WHERE object_id = $1', objectId
     );
-    return NextResponse.json({ errno: 0, errmsg: '', data: toComment(r[0]) });
+    return cors(req, NextResponse.json({ errno: 0, errmsg: '', data: toComment(r[0]) }));
   } catch (e: any) {
-    return NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 });
+    return cors(req, NextResponse.json({ errno: 500, errmsg: e.message }, { status: 500 }));
   }
 }
