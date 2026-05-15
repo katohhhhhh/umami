@@ -209,20 +209,8 @@ export default withNextIntl({
     return [
       ...rewrites,
       {
-        source: '/comment',
-        destination: 'https://waline-two-sandy.vercel.app/comment',
-      },
-      {
-        source: '/comment/:id*',
-        destination: 'https://waline-two-sandy.vercel.app/comment/:id*',
-      },
-      {
         source: '/counter',
         destination: 'https://waline-two-sandy.vercel.app/counter',
-      },
-      {
-        source: '/user',
-        destination: 'https://waline-two-sandy.vercel.app/user',
       },
       {
         source: '/telemetry.js',
